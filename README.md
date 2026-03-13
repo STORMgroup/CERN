@@ -1,2 +1,2 @@
-# NEMO-HMMs
-NEMO-HMMs (Nanopore event modelling Hidden Markov Models)
+# CERN
+Correcting Events in Raw Nanopore Signals
