@@ -30,9 +30,9 @@ In order to train the HMMs, you will need to set up your python environment usin
 
 For evaluation and testing, you will need the following programs installed and in your $PATH:
  - RawHash2 (specifically, the version at https://github.com/STORMgroup/RawHash2) that has support for custom events.
- - minimap2
- - UNCALLED4
- - dorado
+ - minimap2 https://github.com/lh3/minimap2/releases/tag/v2.24
+ - UNCALLED4 https://github.com/skovaka/uncalled4/releases/tag/4.1.0
+ - dorado https://github.com/nanoporetech/dorado/releases/tag/v1.4.0
 
 For instructions to install each of the above programs, check https://github.com/STORMgroup/RawHash2/tree/main/test
 
