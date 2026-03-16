@@ -19,7 +19,7 @@ run_cern ./path/to/hmm_file ./path/to/event_file > corrected_events.txt
 
 The general workflow to measure performace involves multiple steps:
 
-1. Generate events, using the executables in ./src/segmentation/ for RawHash T-test based segmentation. These should be ran the same way RawHash1/2 are ran. You can also create events yourself using other tools, such as Campolina.
+1. Generate events, using the executables in ./src/segmentation/ for RawHash T-test based segmentation. These should be run the same way RawHash1/2 are run. You can also create events yourself using other tools, such as Campolina.
 2. Correct events using the run_cern program in ./src/refinement/ Already trained models are available in ./src/train/models.
 3. Run RawHash2 with and without the corrected events. RawHash2 has support for custom events built-in, using the `--events-file` flag.
 
