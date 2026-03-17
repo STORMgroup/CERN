@@ -10,8 +10,8 @@ EXEC="rawhash2"
 INDEX="../indexes/${PREFIX}_${HPC}_rawhash2_index_sensitive.ind"
 SIGNALS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_small.pod5"
 
-OUTDIR="out_${SEGMENTER}"
-EVENTS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_${SEGMENTER}_events.tsv"
+OUTDIR="out_${SEGMENTER}_corrected"
+EVENTS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_${SEGMENTER}_events_corrected.tsv"
 PARAMS="--chunk-size 99999999 --r10 --events-file ${EVENTS}"
 
 if [[ "$HPC" == "hpc_off" ]]; then

@@ -1,6 +1,6 @@
 # Segmentation — Event Generation
 
-Generate precomputed event values from nanopore signal files using the RawHash or RawHash2 segmentation algorithms.
+Generate precomputed event values from nanopore signal files using the RawHash (ScrappieR9) or RawHash2 (ScrappieR10) segmentation algorithms.
 
 ## Setup
 
@@ -19,10 +19,10 @@ make
 ```bash
 source venv/bin/activate
 
-# RawHash2 (default) on a single file
+# RawHash2 (ScrappieR10) on a single file
 python generate_events.py -m rawhash2 -i /path/to/signals.pod5 -o events.tsv
 
-# RawHash v1.0 on a directory of signal files
+# RawHash v1.0 (ScrappieR9) on a directory of signal files
 python generate_events.py -m rawhash -i /path/to/signal_dir/ -o events.tsv
 ```
 
@@ -76,7 +76,7 @@ Default parameters (from `extern/RawHash2/src/roptions.c`):
 - `peak_height=0.4`
 - `min_segment_length=0`, `max_segment_length=500`
 
-## Project structure
+## Structure
 
 ```
 src/segmentation/

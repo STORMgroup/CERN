@@ -6,18 +6,19 @@ import time
 
 ### Train an already created HMM using the Baum-Welch algorithm on nanopore sequencing data
 
-# This is very similar to HMM_train.py, but this begins training from an HMM already made
+# This is very similar to HMM_train.py, but this begins training from an HMM already made. 
+# This mainly useful if training is interrupted or unfinished.
 
 # A notable difference is that near-zero transitions are set to zero starting from the first training iteration
 
 
 ### Parameters ###
 
-S = 256                             # Number of states
-DATA_LEN = 150000                   # Amount of events in each training batch
+S = 196                             # Number of states
+DATA_LEN = 100000                   # Amount of events in each training batch
 TRAINING_ITERS = 20                 # Training batches
-HMM_TO_LOAD = "latent_hmm_256_150000_40.txt"                                        # Starting HMM
-HMM_FILENAME = f"latent_hmm_{S}_{DATA_LEN}_{TRAINING_ITERS}_continued.txt"          # HMM file to save to
+HMM_TO_LOAD = "hmm_196_100000_30_phase1.txt"                                        # Starting HMM
+HMM_FILENAME = f"hmm_{S}_{DATA_LEN}_{TRAINING_ITERS}_phase1_cont.txt"          # HMM file to save to
 NANOPORE_MODEL_FILE = "../extern/kmer_models/uncalled_r1041_model_only_means.txt"   # Nanopore file to get expected k-mer levels from
 
 ###################
@@ -96,7 +97,7 @@ def gen_data(length, model_file="uncalled_r1041_model_only_means.txt"):
         kmer = dna_seq[i:i+9]
         if kmer not in kmer_dict:
             raise KeyError(f"K-mer {kmer} not found in model file")
-        events[i] = kmer_dict[kmer] + random.random() / 10 - 0.05
+        events[i] = kmer_dict[kmer]
 
     events = events.reshape(-1, 1)
 

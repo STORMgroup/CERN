@@ -15,10 +15,10 @@ import time
 
 ### Parameters ###
 
-S = 256                             # Number of states
-DATA_LEN = 150000                   # Amount of events in each training batch
-TRAINING_ITERS = 40                 # Training batches
-HMM_FILENAME = f"hmm_{S}_{DATA_LEN}_{TRAINING_ITERS}.txt"       # HMM file to save to
+S = 196                             # Number of states
+DATA_LEN = 100000                   # Amount of events in each training batch
+TRAINING_ITERS = 30                 # Training batches to run, will stop here or when model converges
+HMM_FILENAME = f"hmm_{S}_{DATA_LEN}_{TRAINING_ITERS}_phase1.txt"       # HMM file to save to
 NANOPORE_MODEL_FILE = "../extern/kmer_models/uncalled_r1041_model_only_means.txt"     # Nanopore file to get expected k-mer levels from
 
 ###################
@@ -65,7 +65,7 @@ def gen_data(length):
         kmer = dna_seq[i:i+9]
         if kmer not in kmer_dict:
             raise KeyError(f"K-mer {kmer} not found in model file")
-        events[i] = kmer_dict[kmer] + random.random() / 10 - 0.05
+        events[i] = kmer_dict[kmer]
 
     events = events.reshape(-1, 1)
 
