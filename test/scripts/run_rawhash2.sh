@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 THREAD=$1
 PREFIX=$2
@@ -7,7 +8,7 @@ HPC=$4
 SEGMENTER=$5
 
 EXEC="rawhash2"
-INDEX="../indexes/${PREFIX}_${HPC}_rawhash2_index_sensitive.ind"
+INDEX="../indexes/${PREFIX}_${HPC}_rawhash2_index_${PRESET}.ind"
 SIGNALS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_small.pod5"
 
 OUTDIR="out_${SEGMENTER}"
@@ -18,7 +19,7 @@ if [[ "$HPC" == "hpc_off" ]]; then
     PARAMS="${PARAMS} --sig-diff -1"
 fi
 
-mkdir $OUTDIR
+mkdir -p "$OUTDIR"
 
 /usr/bin/time -vpo "${OUTDIR}/${PREFIX}_rawhash2_map_${PRESET}.time" \
 $EXEC -x ${PRESET} -t ${THREAD} ${PARAMS} \
