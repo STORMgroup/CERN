@@ -77,11 +77,12 @@ print("RawHash2 TP: " + str(rawhash2_tp))
 print("RawHash2 FP: " + str(rawhash2_fp))
 print("RawHash2 FN: " + str(rawhash2_fn))
 print("RawHash2 TN: " + str(rawhash2_tn))
-rawhash2_precision = rawhash2_tp / (rawhash2_tp + rawhash2_fp)
+rawhash2_precision = rawhash2_tp / (rawhash2_tp + rawhash2_fp) if (rawhash2_tp + rawhash2_fp) > 0 else 0
 print("RawHash2 precision: " + str(rawhash2_precision))
-rawhash2_recall = rawhash2_tp / (rawhash2_tp + rawhash2_fn)
+rawhash2_recall = rawhash2_tp / (rawhash2_tp + rawhash2_fn) if (rawhash2_tp + rawhash2_fn) > 0 else 0
 print("RawHash2 recall: " + str(rawhash2_recall))
-print("RawHash2 F-1 score: " + str(2 * rawhash2_precision * rawhash2_recall / (rawhash2_precision + rawhash2_recall)))
+rawhash2_f1 = 2 * rawhash2_precision * rawhash2_recall / (rawhash2_precision + rawhash2_recall) if (rawhash2_precision + rawhash2_recall) > 0 else 0
+print("RawHash2 F-1 score: " + str(rawhash2_f1))
 print("RawHash2 Mean time per mapped read : " + str(mean(rawhash2_time_per_chunk)))
 print("RawHash2 Median time per mapped read : " + str(median(rawhash2_time_per_chunk)))
 print("RawHash2 Mean time per unmapped read : " + str(mean(rawhash2_time_per_read)))

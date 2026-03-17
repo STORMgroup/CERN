@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 OUTFILE="summary.txt"
 > "$OUTFILE"   # clear previous output
@@ -51,9 +52,9 @@ find . -type f -name "*.throughput" | sort | while read -r file; do
     }
 
     END {
-        precision = TP / (TP + FP)
-        recall = TP / (TP + FN)
-        f1 = 2 * precision * recall / (precision + recall)
+        precision = (TP + FP > 0) ? TP / (TP + FP) : 0
+        recall = (TP + FN > 0) ? TP / (TP + FN) : 0
+        f1 = (precision + recall > 0) ? 2 * precision * recall / (precision + recall) : 0
         accuracy = (TP + TN) / (TP + TN + FP + FN)
 
         printf "%s\n", summary
