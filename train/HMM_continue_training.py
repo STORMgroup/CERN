@@ -186,7 +186,11 @@ def save_hmm(hmm):
 
         # Line 3: transitions (row-major)
         file.write(" ".join(str(t) for t in trans.flatten()) + "\n")
-    
+
+        # Line 4: error-free transitions (1 where transition > 0, 0 otherwise)
+        error_free_trans = ["1" if t > 0 else "0" for t in trans.flatten()]
+        file.write(" ".join(error_free_trans) + "\n")
+
     return
 
 def trim_transitions(hmm, threshold=0.001):
