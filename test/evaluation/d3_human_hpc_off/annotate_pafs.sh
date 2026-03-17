@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 PREFIX="d3_human"
 PRESET="fast"
@@ -7,9 +8,9 @@ HPC="hpc_off"
 COMBINED="${PREFIX}_${PRESET}_${HPC}"
 
 OUTDIR="results"
-mkdir ${OUTDIR}
+mkdir -p "${OUTDIR}"
 
-TRUE_MAPPINGS="../../data/cern_datasets/CERN_DATA/${PREFIX}_small/${PREFIX}_true_mappings.paf"
+TRUE_MAPPINGS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_true_mappings.paf"
 
 SEGMENTER="scrappieR9"
 

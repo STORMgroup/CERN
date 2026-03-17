@@ -4,7 +4,7 @@ set -e
 THREAD=32
 PORE="../../extern/kmer_models/uncalled_r1041_model_only_means.txt"
 
-OUTDIR="rh2_indexes"
+OUTDIR="indexes"
 mkdir -p "$OUTDIR"
 
 datasets=(d1_ecoli d2_dmelanogaster d3_human)
@@ -41,7 +41,7 @@ for d in "${datasets[@]}"; do
 
     /usr/bin/time -vpo "${OUTDIR}/${PREFIX}_rawhash2_index_${PRESET}.time" \
     rawhash2 -x ${PRESET} -t ${THREAD} -p "${PORE}" ${PARAMS} \
-    -d "${OUTDIR}/${PREFIX}_rawhash2_${PRESET}.ind" \
+    -d "${OUTDIR}/${PREFIX}_rawhash2_index_${PRESET}.ind" \
     ${REF}
 
   done
