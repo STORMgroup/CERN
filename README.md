@@ -22,3 +22,5 @@ To evaluate CERN's error correction accuracy and runtime, clone this repository 
 ## Requirements
 
 The requirements for each section of CERN are listed in their respective repositories. Get started by installing the necessary tools for evaluation in ./test/tools
+
+To compile the CERN executable, use gcc version 11.2.0 or higher.
