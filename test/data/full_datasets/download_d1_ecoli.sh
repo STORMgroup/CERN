@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 mkdir -p d1_ecoli_r1041/pod5_files/
 cd d1_ecoli_r1041

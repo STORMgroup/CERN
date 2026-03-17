@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # This requires Dorado v0.9.0
 
@@ -46,12 +47,12 @@ INFERENCE="${CAMPOLINA_PATH}/inference.py"
 SIGNALS="${DATA_DIR}/"
 MODEL="${CAMPOLINA_PATH}/R10_model.pth"
 
-python ${INFERENCE} --pod5_dir ${SIGNALS} --model_path ${MODEL} --workers 16 --bs 512
+python "${INFERENCE}" --pod5_dir "${SIGNALS}" --model_path "${MODEL}" --workers 16 --bs 512
 
 PARQTOE="../../scripts/convert_parquet_to_events.py"
 TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
 PARQUET="test_multithread_events.parquet"
 
-python ${PARQTOE} --parquet ${PARQUET} --pod5 ${SIGNALS} --target ${TARGET}
+python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
 
 "$CERN_PATH" "$MODEL_DIR/hmm_196_camp.txt" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"

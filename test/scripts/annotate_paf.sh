@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 PREFIX=$1
 GT=$2

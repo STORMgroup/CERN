@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 mkdir -p d2_dmelanogaster_r1041/fast5_files/
 cd d2_dmelanogaster_r1041

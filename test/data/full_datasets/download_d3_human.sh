@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 mkdir -p d3_human_hg002_r1041/pod5_files/
 cd d3_human_hg002_r1041/pod5_files
