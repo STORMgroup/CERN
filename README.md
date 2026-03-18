@@ -49,4 +49,4 @@ In [train](./train/), you can train Hidden Markov Models to model nanopore dynam
 
 # Reproducing the results
 
-Follow the steps in [test/evaluation/README.md](./test/evaluation/README.md).
+Follow the steps in [test/evaluation/README.md](./test/evaluation/).
