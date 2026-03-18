@@ -1,0 +1,16 @@
+name: cern-env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - h5py
+  - seqkit=2.5.1
+  - ont_vbz_hdf_plugin=1.0.1
+  - pyslow5
+  - pip:
+      - pod5
