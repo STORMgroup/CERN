@@ -1,7 +1,7 @@
 # Installing necessary tools
 
 Follow these steps to install the tools necessary to evaluate CERN.
-To compile these tools, use gcc version 11.2.0 or higher.
+To compiling these tools, will require gcc version 11.2.0 or higher.
 
 ```
 #We will use cern-env directory to download and compile the tools from their repositories
