@@ -10,7 +10,7 @@ mkdir bin
 #Important: If you already completed the Step 0 and Step 1 as described, you can skip these steps and add the binaries to your PATH again
 #Re-adding the binary to your path is necessary after you start a new shell session.
 
-Step 0 Creating a conda environment:
+# Step 0 Creating a conda environment:
 
 conda env create -f environment.yml
 conda activate cern-env
