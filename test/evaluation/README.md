@@ -17,6 +17,7 @@ bash ./map_all.sh
 6. Compare the results by running annotate_pafs.sh then summarize_annotations.sh in a dataset's evaluation directory
 ```bash
 cd d1_ecoli_hpc_off # Navigate to the wanted directory
+conda activate cern-env # Needed for access to uncalled pafstats
 bash ./annotate_pafs.sh
 bash ./summarize_annotations.sh
 ```
