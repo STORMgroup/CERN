@@ -4,6 +4,8 @@ Generate precomputed event values from nanopore signal files using the RawHash (
 
 ## Setup
 
+Ensure that you are not using the `cern-env` created in [../../test/tools](../../test/tools)
+
 ```bash
 # Create a virtual environment and install dependencies
 python3 -m venv venv

@@ -29,30 +29,37 @@ SCRAP_PATH="../../../src/segmentation/generate_events.py"
 MODEL_DIR="../../../train/models"
 
 # Generate events
+SEGMENTER_ENV="../../../src/segmentation/venv"
+
+# --- Activate venv for segmenter ---
+source "$SEGMENTER_ENV/bin/activate"
+
 python "$SCRAP_PATH" -m rawhash  -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"
 
 python "$SCRAP_PATH" -m rawhash2 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
+
+deactivate
 
 # Correct events with CERN
 "$CERN_PATH" "$MODEL_DIR/hmm_196_scrapR9.txt"  "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"  > "${DATA_DIR}/${PREFIX}_scrappieR9_events_corrected.tsv"
 
 "$CERN_PATH" "$MODEL_DIR/hmm_196_scrapR10.txt" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
 
-# Optional: Also create campolina events
+# Optional: Create and correct campolina events
 
-# Fill this in:
-CAMPOLINA_PATH="../../tools/Campolina"
+# CAMPOLINA_PATH="../../tools/Campolina"
 
-INFERENCE="${CAMPOLINA_PATH}/inference.py"
-SIGNALS="${DATA_DIR}/"
-MODEL="${CAMPOLINA_PATH}/R10_model.pth"
+# INFERENCE="${CAMPOLINA_PATH}/inference.py"
+# SIGNALS="${DATA_DIR}/"
+# MODEL="${CAMPOLINA_PATH}/weights/R10_model.pth"
 
-python "${INFERENCE}" --pod5_dir "${SIGNALS}" --model_path "${MODEL}" --workers 16 --bs 512
 
-PARQTOE="../../scripts/convert_parquet_to_events.py"
-TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
-PARQUET="test_multithread_events.parquet"
+# conda run -n campolina python "${INFERENCE}" --pod5_dir "${SIGNALS}" --model_path "${MODEL}" --workers 16 --bs 512
 
-python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
+# PARQTOE="../../scripts/convert_parquet_to_events.py"
+# TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
+# PARQUET="test_multithread_events.parquet"
 
-"$CERN_PATH" "$MODEL_DIR/hmm_196_camp.txt" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"
+# python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
+
+# "$CERN_PATH" "$MODEL_DIR/hmm_196_camp.txt" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"

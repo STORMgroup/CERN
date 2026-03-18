@@ -12,7 +12,12 @@ mkdir bin
 
 # Step 0 Creating a conda environment:
 
-conda env create -f environment.yml
+conda config --add channels defaults
+conda config --add channels bioconda
+conda config --add channels conda-forge
+conda config --set channel_priority strict
+
+conda create -n cern-env python=3.6.15 pip=21.3.1 ont_vbz_hdf_plugin=1.0.1 seqkit=2.5.1
 conda activate cern-env
 
 #Installing SRA Toolkit
@@ -40,7 +45,7 @@ wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-1.4.0-linux-x64.t
 wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-0.9.0-linux-x64.tar.gz; tar -xf dorado-0.9.0-linux-x64.tar.gz; rm dorado-0.9.0-linux-x64.tar.gz;
 
 #Downloading Campolina
-git clone https://github.com/lbcb-sci/Campolina;
+git clone https://github.com/lbcb-sci/Campolina; cd Campolina; conda env create -f environment.yml; mkdir weights; cd weights; wget https://zenodo.org/records/15626806/files/R10_model.pth; cd ../../;
 
 #Step 2 Adding binaries to PATH
 #If you are skipping Step 0 and Step 1, uncomment the following line and execute:
