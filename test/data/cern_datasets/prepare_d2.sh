@@ -34,9 +34,9 @@ SEGMENTER_ENV="../../../src/segmentation/venv"
 # --- Activate venv for segmenter ---
 source "$SEGMENTER_ENV/bin/activate"
 
-python "$SCRAP_PATH" -m rawhash  -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"
+python "$SCRAP_PATH" -m rawhash  --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"
 
-python "$SCRAP_PATH" -m rawhash2 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
+python "$SCRAP_PATH" -m rawhash2 --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
 
 deactivate
 
