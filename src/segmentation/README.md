@@ -19,7 +19,10 @@ make
 ```bash
 source venv/bin/activate
 
-# RawHash2 (ScrappieR10) on a single file
+# RawHash2 (ScrappieR10) with R10.4.1 parameters
+python generate_events.py -m rawhash2 --r10 -i /path/to/signals.pod5 -o events.tsv
+
+# RawHash2 with base defaults (without --r10 preset)
 python generate_events.py -m rawhash2 -i /path/to/signals.pod5 -o events.tsv
 
 # RawHash v1.0 (ScrappieR9) on a directory of signal files
@@ -75,6 +78,13 @@ Default parameters (from `extern/RawHash2/src/roptions.c`):
 - `window_length2=9`, `threshold2=3.5`
 - `peak_height=0.4`
 - `min_segment_length=0`, `max_segment_length=500`
+
+**R10.4.1 preset** (`--r10`, from `extern/RawHash2/src/main.c`):
+- `window_length1=3`, `threshold1=5.5`
+- `window_length2=6`, `threshold2=3.5`
+- `peak_height=0.2`
+
+Use `--r10` when generating events for R10.4.1 data to match the parameters used by `rawhash2 --r10`.
 
 ## Structure
 

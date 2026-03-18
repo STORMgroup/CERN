@@ -103,6 +103,18 @@ RH2_DEFAULTS = {
     "max_segment_length": 500,
 }
 
+# ── RawHash2 --r10 preset (from extern/RawHash2/src/main.c) ──────
+
+RH2_R10_DEFAULTS = {
+    "window_length1": 3,
+    "window_length2": 6,
+    "threshold1": 5.5,
+    "threshold2": 3.5,
+    "peak_height": 0.2,
+    "min_segment_length": 0,
+    "max_segment_length": 500,
+}
+
 
 # ── Public API ───────────────────────────────────────────────────────────────
 

@@ -28,6 +28,7 @@ from event_detector import (
     detect_events_rawhash2,
     RH1_DEFAULTS,
     RH2_DEFAULTS,
+    RH2_R10_DEFAULTS,
 )
 
 
@@ -64,19 +65,21 @@ def main():
 
     # RawHash2 parameters
     rh2 = parser.add_argument_group("RawHash2 parameters")
-    rh2.add_argument("--rh2-window1", type=int, default=RH2_DEFAULTS["window_length1"],
+    rh2.add_argument("--r10", action="store_true",
+                     help="Use R10.4.1 segmentation preset (matches RawHash2 --r10).")
+    rh2.add_argument("--rh2-window1", type=int, default=None,
                      help="Short window length.")
-    rh2.add_argument("--rh2-window2", type=int, default=RH2_DEFAULTS["window_length2"],
+    rh2.add_argument("--rh2-window2", type=int, default=None,
                      help="Long window length.")
-    rh2.add_argument("--rh2-threshold1", type=float, default=RH2_DEFAULTS["threshold1"],
+    rh2.add_argument("--rh2-threshold1", type=float, default=None,
                      help="Short detector threshold.")
-    rh2.add_argument("--rh2-threshold2", type=float, default=RH2_DEFAULTS["threshold2"],
+    rh2.add_argument("--rh2-threshold2", type=float, default=None,
                      help="Long detector threshold.")
-    rh2.add_argument("--rh2-peak-height", type=float, default=RH2_DEFAULTS["peak_height"],
+    rh2.add_argument("--rh2-peak-height", type=float, default=None,
                      help="Minimum peak height.")
-    rh2.add_argument("--rh2-min-seg-len", type=int, default=RH2_DEFAULTS["min_segment_length"],
+    rh2.add_argument("--rh2-min-seg-len", type=int, default=None,
                      help="Minimum segment length.")
-    rh2.add_argument("--rh2-max-seg-len", type=int, default=RH2_DEFAULTS["max_segment_length"],
+    rh2.add_argument("--rh2-max-seg-len", type=int, default=None,
                      help="Maximum segment length.")
 
     args = parser.parse_args()
@@ -121,16 +124,26 @@ def main():
                 n_written += 1
 
         elif args.method == "rawhash2":
+            # Select base defaults: --r10 preset or standard RawHash2
+            base = RH2_R10_DEFAULTS if args.r10 else RH2_DEFAULTS
+            rh2_window1 = args.rh2_window1 if args.rh2_window1 is not None else base["window_length1"]
+            rh2_window2 = args.rh2_window2 if args.rh2_window2 is not None else base["window_length2"]
+            rh2_threshold1 = args.rh2_threshold1 if args.rh2_threshold1 is not None else base["threshold1"]
+            rh2_threshold2 = args.rh2_threshold2 if args.rh2_threshold2 is not None else base["threshold2"]
+            rh2_peak_height = args.rh2_peak_height if args.rh2_peak_height is not None else base["peak_height"]
+            rh2_min_seg_len = args.rh2_min_seg_len if args.rh2_min_seg_len is not None else base["min_segment_length"]
+            rh2_max_seg_len = args.rh2_max_seg_len if args.rh2_max_seg_len is not None else base["max_segment_length"]
+
             for read in reads:
                 events = detect_events_rawhash2(
                     read.signal_pA,
-                    window_length1=args.rh2_window1,
-                    window_length2=args.rh2_window2,
-                    threshold1=args.rh2_threshold1,
-                    threshold2=args.rh2_threshold2,
-                    peak_height=args.rh2_peak_height,
-                    min_segment_length=args.rh2_min_seg_len,
-                    max_segment_length=args.rh2_max_seg_len,
+                    window_length1=rh2_window1,
+                    window_length2=rh2_window2,
+                    threshold1=rh2_threshold1,
+                    threshold2=rh2_threshold2,
+                    peak_height=rh2_peak_height,
+                    min_segment_length=rh2_min_seg_len,
+                    max_segment_length=rh2_max_seg_len,
                 )
                 if len(events) == 0:
                     n_skipped += 1
