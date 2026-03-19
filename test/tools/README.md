@@ -26,7 +26,7 @@ wget -qO- https://ftp-trace.ncbi.nlm.nih.gov/sra/sdk/3.0.1/sratoolkit.3.0.1-ubun
 #Step 1 Compiling the tools
 #Cloning and compiling RawHash2
 #Recommended: using CMake (by default compiles with POD5 support only)
-git clone --recursive https://github.com/STORMgroup/RawHash2.git rawhash2 && cd rawhash2 && make cmake && cp ./bin/rawhash2 ../bin/ && cd ..
+git clone --recursive https://github.com/STORMgroup/RawHash2.git rawhash2 && cd rawhash2 && git checkout 1386353d78c90b4c7bfae0e96e33e1e1a44ef20d && git submodule update --init --recursive && make cmake && cp ./bin/rawhash2 ../bin/ && cd ..
 
 #Alternative: using Make only (no CMake required)
 # git clone --recursive https://github.com/STORMgroup/RawHash2.git rawhash2 && cd rawhash2 && make && cp ./bin/rawhash2 ../bin/ && cd ..
