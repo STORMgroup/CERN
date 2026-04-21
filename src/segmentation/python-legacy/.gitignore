@@ -1,0 +1,6 @@
+venv/
+lib/
+__pycache__/
+*.pyc
+*.pyo
+*.so

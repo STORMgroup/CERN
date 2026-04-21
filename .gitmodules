@@ -1,0 +1,10 @@
+[submodule "src/segmentation/extern/slow5lib"]
+	path = src/segmentation/extern/slow5lib
+	url = https://github.com/hasindu2008/slow5lib
+[submodule "src/segmentation/extern/hdf5"]
+	path = src/segmentation/extern/hdf5
+	url = https://github.com/HDFGroup/hdf5.git
+	ignore = dirty
+[submodule "src/segmentation/extern/zstd"]
+	path = src/segmentation/extern/zstd
+	url = https://github.com/facebook/zstd

@@ -1,23 +1,36 @@
-CC = gcc
-CFLAGS = -Wall -O3 -shared -fPIC -lm
+# Thin Makefile wrapper around the CMake build.
+#
+# Options (pass-through to CMake):
+#   CMAKE_OPTS="-DENABLE_HDF5=ON -DENABLE_SLOW5=ON"
+# Examples:
+#   make                                                 # POD5 only (default)
+#   make CMAKE_OPTS="-DENABLE_HDF5=ON -DENABLE_SLOW5=ON" # all formats
+#   make clean
 
-C_SRC = c_src
-LIB_DIR = lib
+.PHONY: all cmake clean help
 
-TARGETS = $(LIB_DIR)/rawhash_events.so $(LIB_DIR)/rawhash2_events.so
+ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+JOBS     ?= $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+CMAKE_OPTS ?=
 
-all: $(LIB_DIR) $(TARGETS)
+all: cmake
 
-$(LIB_DIR):
-	mkdir -p $(LIB_DIR)
-
-$(LIB_DIR)/rawhash_events.so: $(C_SRC)/rawhash_events.c | $(LIB_DIR)
-	$(CC) $(CFLAGS) -o $@ $<
-
-$(LIB_DIR)/rawhash2_events.so: $(C_SRC)/rawhash2_events.c | $(LIB_DIR)
-	$(CC) $(CFLAGS) -o $@ $<
+cmake:
+	@mkdir -p build
+	cd build && cmake $(CMAKE_OPTS) $(ROOT_DIR)
+	cmake --build build -j$(JOBS)
+	@mkdir -p bin && cp build/src/generate_events bin/
+	@echo "Build complete: bin/generate_events"
 
 clean:
-	rm -rf $(LIB_DIR)
+	rm -rf bin build
 
-.PHONY: all clean
+help:
+	@echo "Segmentation build system (CMake wrapper)"
+	@echo ""
+	@echo "Targets:"
+	@echo "  make                                          Build with POD5 enabled (default)"
+	@echo '  make CMAKE_OPTS="-DENABLE_HDF5=ON"            Enable FAST5 support'
+	@echo '  make CMAKE_OPTS="-DENABLE_SLOW5=ON"           Enable SLOW5/BLOW5 support'
+	@echo '  make CMAKE_OPTS="-DENABLE_POD5=OFF ..."       Disable POD5'
+	@echo "  make clean                                    Remove build/ and bin/"
