@@ -16,7 +16,7 @@ EVENTS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_${SEGMENTER
 PARAMS="--chunk-size 99999999 --r10 --events-file ${EVENTS}"
 
 if [[ "$HPC" == "hpc_off" ]]; then
-    PARAMS="${PARAMS} --sig-diff 0"
+    PARAMS="${PARAMS} --sig-diff -1"
 fi
 
 mkdir -p "$OUTDIR"
