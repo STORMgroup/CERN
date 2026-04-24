@@ -182,7 +182,7 @@ echo "Phase 1: Grid search (WINDOWSIZE=20)"
 echo "========================================"
 
 WINDOWSIZE=20
-GRID_VALS="0.0 0.1 0.2 0.3"
+GRID_VALS="0.0 0.05 0.1 0.2 0.3"
 
 BEST_F1="-1"
 PSTAY="0.1"
