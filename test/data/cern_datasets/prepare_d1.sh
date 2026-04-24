@@ -16,7 +16,7 @@ PAF_FILE="${DATA_DIR}/${PREFIX}_true_mappings.paf"
 
 # Generate the ground truth mappings:
 
-DORADO_PATH="../../tools/dorado-1.4.0-linux-x64/bin/dorado"
+DORADO_PATH="../../dorado-1.4.0-linux-x64/bin/dorado"
 
 ${DORADO_PATH} basecaller sup "$POD5_FILE" --emit-fastq > "$FASTQ_FILE"
 
@@ -24,30 +24,25 @@ minimap2 -x map-ont -t "${THREAD}" -o "$PAF_FILE" "$REF_FILE" "$FASTQ_FILE"
 
 # Generate the segmentations, and correct them:
 
+# Generate events
+SEGMENTER="../../../src/segmentation/bin/generate_events"
+
+"$SEGMENTER" -m rawhash  --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"
+
+"$SEGMENTER" -m rawhash2 --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
+
+
 CERN_PATH="../../../src/run_cern"
-SCRAP_PATH="../../../src/segmentation/generate_events.py"
 MODEL_DIR="../../../train/models"
 
-# Generate events
-SEGMENTER_ENV="../../../src/segmentation/venv"
-
-# --- Activate venv for segmenter ---
-source "$SEGMENTER_ENV/bin/activate"
-
-python "$SCRAP_PATH" -m rawhash  --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"
-
-python "$SCRAP_PATH" -m rawhash2 --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
-
-deactivate
-
 # Correct events with CERN
-"$CERN_PATH" "$MODEL_DIR/hmm_196_scrapR9.txt"  "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"  > "${DATA_DIR}/${PREFIX}_scrappieR9_events_corrected.tsv"
+"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm"  "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"  > "${DATA_DIR}/${PREFIX}_scrappieR9_events_corrected.tsv"
 
-"$CERN_PATH" "$MODEL_DIR/hmm_196_scrapR10.txt" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
+"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
 
 # Optional: Create and correct campolina events
 
-# CAMPOLINA_PATH="../../tools/Campolina"
+# CAMPOLINA_PATH="../../Campolina"
 
 # INFERENCE="${CAMPOLINA_PATH}/inference.py"
 # SIGNALS="${DATA_DIR}/"
