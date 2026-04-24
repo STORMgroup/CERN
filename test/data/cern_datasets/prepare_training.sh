@@ -30,7 +30,7 @@ SEGMENTER="../../../src/segmentation/bin/generate_events"
 
 "$SEGMENTER" -m rawhash2 --r10 -i "$DATA_DIR" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
 
-# Create and correct campolina events
+# Create and campolina events
 
 CAMPOLINA_PATH="../../Campolina"
 
@@ -46,5 +46,3 @@ TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
 PARQUET="test_multithread_events.parquet"
 
 python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
-
-"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"

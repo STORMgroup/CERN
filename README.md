@@ -18,7 +18,7 @@ In its current implementation, CERN takes in event sequences from a .tsv file, a
 * Clone the code from its GitHub repository:
 
 ```bash
-git clone https://github.com/STORMgroup/CERN.git
+git clone --recursive https://github.com/STORMgroup/CERN.git
 cd CERN
 ```
 
@@ -37,10 +37,10 @@ cp run_cern /path/to/bin/
 
 # Usage
 
-Correct nanopore event sequences by providing the path to the trained HMM, as well as the .tsv containing event sequences:
+Correct nanopore event sequences by providing the path to the trained HMM, the .tsv containing event sequences, and the parameters p_stay and p_skip:
 
 ```
-run_cern ./path/to/hmm_file.txt ./path/to/event_file.tsv > corrected_events.tsv
+run_cern ./path/to/hmm_file.hmm ./path/to/event_file.tsv <p_stay> <p_skip> > corrected_events.tsv
 ```
 
 # Training HMMs
