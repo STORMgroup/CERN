@@ -40,21 +40,21 @@ MODEL_DIR="../../../train/models"
 
 "$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
 
-# Optional: Create and correct campolina events
+# Create and correct campolina events
 
-# CAMPOLINA_PATH="../../Campolina"
+CAMPOLINA_PATH="../../Campolina"
 
-# INFERENCE="${CAMPOLINA_PATH}/inference.py"
-# SIGNALS="${DATA_DIR}/"
-# MODEL="${CAMPOLINA_PATH}/weights/R10_model.pth"
+INFERENCE="${CAMPOLINA_PATH}/inference.py"
+SIGNALS="${DATA_DIR}/"
+MODEL="${CAMPOLINA_PATH}/weights/R10_model.pth"
 
 
-# conda run -n campolina python "${INFERENCE}" --pod5_dir "${SIGNALS}" --model_path "${MODEL}" --workers 16 --bs 512
+python "${INFERENCE}" --pod5_dir "${SIGNALS}" --model_path "${MODEL}" --workers 1 --bs 256 --gpu 0
 
-# PARQTOE="../../scripts/convert_parquet_to_events.py"
-# TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
-# PARQUET="test_multithread_events.parquet"
+PARQTOE="../../scripts/convert_parquet_to_events.py"
+TARGET="${DATA_DIR}/${PREFIX}_campolina_events.tsv"
+PARQUET="test_multithread_events.parquet"
 
-# python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
+python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
 
-# "$CERN_PATH" "$MODEL_DIR/hmm_196_camp.txt" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"
+"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"

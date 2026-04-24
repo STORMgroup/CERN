@@ -54,101 +54,93 @@ static vector<int> parse_ints(const string& line) {
     return values;
 }
 
-/*
- * Load HMM from file
- */
-HMM load_hmm(const string& filename) {
+HMM load_hmm(const string& filename, float p_stay, float p_skip) {
     ifstream fin(filename);
     if (!fin.is_open()) {
         throw runtime_error("Could not open HMM file: " + filename);
     }
 
     HMM hmm;
-
     string line;
 
     // ---- means ----
-    if (!getline(fin, line)) {
-        throw runtime_error("Failed to read means line");
-    }
+    if (!getline(fin, line)) throw runtime_error("Failed to read means line");
     hmm.means = parse_floats(line);
     int N = hmm.means.size();
 
     // ---- variances ----
-    if (!getline(fin, line)) {
-        throw runtime_error("Failed to read variances line");
-    }
+    if (!getline(fin, line)) throw runtime_error("Failed to read variances line");
     hmm.variances = parse_floats(line);
-    if ((int)hmm.variances.size() != N) {
-        throw runtime_error("Variances size mismatch");
-    }
+    if ((int)hmm.variances.size() != N) throw runtime_error("Variances size mismatch");
 
     // ---- emission precompute ----
     const float LOG_2PI = log(2.0f * M_PI);
-
     hmm.log_norm.resize(N);
     hmm.inv2_var.resize(N);
-
     for (int s = 0; s < N; ++s) {
         float var = hmm.variances[s];
-
-        if (var <= 0.0f) {
-            throw runtime_error("Variance must be > 0");
-        }
-
+        if (var <= 0.0f) throw runtime_error("Variance must be > 0");
         hmm.log_norm[s] = -0.5f * (LOG_2PI + log(var));
         hmm.inv2_var[s] = 1.0f / (2.0f * var);
     }
 
-
-    // ---- transitions ----
-    if (!getline(fin, line)) {
-        throw runtime_error("Failed to read transitions line");
-    }
+    // ---- transitions (raw, from file) ----
+    if (!getline(fin, line)) throw runtime_error("Failed to read transitions line");
     vector<float> flat_trans = parse_floats(line);
-    if ((int)flat_trans.size() != N * N) {
-        throw runtime_error("Transition matrix size mismatch");
-    }
+    if ((int)flat_trans.size() != N * N) throw runtime_error("Transition matrix size mismatch");
 
     hmm.transitions.resize(N, vector<float>(N));
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
             hmm.transitions[i][j] = flat_trans[i * N + j];
-        }
+
+    // ---- adjacency list from original non-zero off-diagonal entries ----
+    hmm.to_adj_list.resize(N);
+    for (int i = 0; i < N; ++i)
+        for (int j = 0; j < N; ++j)
+            if (i != j && hmm.transitions[i][j] > 0.0f)
+                hmm.to_adj_list[j].push_back(i);
+
+    // ---- apply p_stay and p_skip, then normalize ----
+    for (int i = 0; i < N; ++i) {
+        // count off-diagonal zeros
+        int zero_count = 0;
+        for (int j = 0; j < N; ++j)
+            if (i != j && hmm.transitions[i][j] == 0.0f)
+                ++zero_count;
+
+        float p_skip_each = (zero_count > 0) ? (p_skip / zero_count) : 0.0f;
+
+        // assign self-transition and distribute p_skip
+        hmm.transitions[i][i] = p_stay;
+        for (int j = 0; j < N; ++j)
+            if (i != j && hmm.transitions[i][j] == 0.0f)
+                hmm.transitions[i][j] = p_skip_each;
+
+        // sum of original non-zero off-diagonal entries
+        float orig_sum = 0.0f;
+        for (int j = 0; j < N; ++j)
+            if (i != j && flat_trans[i * N + j] > 0.0f)
+                orig_sum += flat_trans[i * N + j];
+
+        // remaining probability after p_stay and p_skip
+        float remaining = 1.0f - p_stay - p_skip;
+
+        // scale original non-zero off-diagonal entries
+        for (int j = 0; j < N; ++j)
+            if (i != j && flat_trans[i * N + j] > 0.0f)
+                hmm.transitions[i][j] = (orig_sum > 0.0f)
+                    ? flat_trans[i * N + j] / orig_sum * remaining
+                    : 0.0f;
     }
 
     // ---- log transitions ----
     hmm.log_transitions.resize(N, vector<float>(N));
-    for (int i = 0; i < N; ++i) {
+    for (int i = 0; i < N; ++i)
         for (int j = 0; j < N; ++j) {
             float p = hmm.transitions[i][j];
-            if (p > 0.0f)
-                hmm.log_transitions[i][j] = log(p);
-            else
-                hmm.log_transitions[i][j] = -INFINITY;
+            hmm.log_transitions[i][j] = (p > 0.0f) ? log(p) : -INFINITY;
         }
-    }
-
-    // ---- error-free transitions (adjacency) ----
-    if (!getline(fin, line)) {
-        throw runtime_error("Failed to read error-free transitions line");
-    }
-    vector<int> valid = parse_ints(line);
-    if ((int)valid.size() != N * N) {
-        throw runtime_error("Error-free transition matrix size mismatch");
-    }
-
-    hmm.to_adj_list.resize(N);
-
-    // If valid transition goes from i -> j, append i to jth list
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            int v = valid[i * N + j];
-            if (v == 1) {
-                hmm.to_adj_list[j].push_back(i);
-            }
-        }
-    }
 
     fin.close();
     return hmm;
@@ -242,7 +234,7 @@ vector<int> viterbi_fast(
 
                 if (score > best_score) {
                     best_score = score;
-                    best_prev = p; 
+                    best_prev = -p; 
                 }
             }
 
@@ -271,7 +263,7 @@ vector<int> viterbi_fast(
 
     for (int t = T - 1; t > 0; --t) {
 
-        int prev = backptr[t][cur_state];
+        int prev = backptr[t][std::abs(cur_state)];
 
         path[t-1] = prev;
         cur_state = prev;
@@ -448,7 +440,7 @@ int main(int argc, char* argv[]) {
     // ---- required positional args ----
     if (argc < 3) {
         cerr << "Usage: " << argv[0]
-             << " <hmm_file> <event_file> "
+             << " <hmm_file> <event_file> <p_stay> <p_skip>"
              << "[--window-size N] "
              << "[--no-noise-removal] "
              << "[--no-stay-removal]\n";
@@ -457,9 +449,11 @@ int main(int argc, char* argv[]) {
 
     string hmm_filename = argv[1];
     string event_filename = argv[2];
+    float p_stay = stof(argv[3]);
+    float p_skip = stof(argv[4]);
 
     // ---- parse optional flags ----
-    for (int i = 3; i < argc; ++i) {
+    for (int i = 5; i < argc; ++i) {
         string arg = argv[i];
 
         if (arg == "--window-size") {
@@ -481,7 +475,7 @@ int main(int argc, char* argv[]) {
     }
 
     // ---- load HMM ----
-    HMM hmm = load_hmm(hmm_filename);
+    HMM hmm = load_hmm(hmm_filename, p_stay, p_skip);
 
     // ---- open event file ----
     ifstream fin(event_filename);
