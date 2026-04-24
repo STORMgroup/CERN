@@ -4,12 +4,22 @@ set -e
 # This requires Dorado v1.4.0
 
 DATA_DIR="./CERN_data/d1_ecoli_training"
+
 PREFIX="d1_ecoli_training"
+
+FASTQ_FILE="${DATA_DIR}/${PREFIX}_reads.fastq"
+REF_FILE="${DATA_DIR}/${PREFIX}_ref.fa"
+PAF_FILE="${DATA_DIR}/${PREFIX}_true_mappings.paf"
 
 THREAD=$1
 
-# Input / output files
-POD5_FILE="${DATA_DIR}/${PREFIX}_small.pod5"
+# # Generate the ground truth mappings:
+
+DORADO_PATH="../../tools/dorado-1.4.0-linux-x64/bin/dorado"
+
+${DORADO_PATH} basecaller sup "$DATA_DIR" --emit-fastq > "$FASTQ_FILE"
+
+minimap2 -x map-ont -t "${THREAD}" -o "$PAF_FILE" "$REF_FILE" "$FASTQ_FILE"
 
 # Generate the segmentations
 
