@@ -2,8 +2,8 @@ CC = gcc
 CFLAGS = -O3 -march=native -fopenmp -ffast-math
 LDFLAGS = -lm
 
-TARGET = train_hmm_chunk
-SRC = train_hmm_chunk.c
+TARGET = train_hmm
+SRC = train_hmm.c
 
 all: $(TARGET)
 

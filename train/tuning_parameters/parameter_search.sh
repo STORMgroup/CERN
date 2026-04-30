@@ -5,6 +5,8 @@ THREAD=$1
 MODEL=$2
 SEGMENTER=$3
 
+START_TIME=$(date +%s)
+
 # Derive a unique tag for this run so parallel runs don't collide
 MODEL_TAG=$(basename "$MODEL" | sed 's/\.[^.]*$//')
 RUN_ID="${MODEL_TAG}_${SEGMENTER}"
@@ -182,7 +184,7 @@ echo "Phase 1: Grid search (WINDOWSIZE=20)"
 echo "========================================"
 
 WINDOWSIZE=20
-GRID_VALS="0.0 0.05 0.1 0.2 0.3"
+GRID_VALS="0.0 0.025 0.05 0.1 0.2 0.3"
 
 BEST_F1="-1"
 PSTAY="0.1"
@@ -220,59 +222,8 @@ done
 echo ""
 echo "Best P_STAY=$PSTAY P_SKIP=$PSKIP F1=$BEST_F1 (WINDOWSIZE=$WINDOWSIZE)"
 
-# ---------------------------------------------------------------------------
-# Phase 3: Hill-climb for WINDOWSIZE
-# ---------------------------------------------------------------------------
-echo ""
-echo "========================================"
-echo "Phase 3: Hill-climb for WINDOWSIZE (P_STAY=$PSTAY P_SKIP=$PSKIP)"
-echo "========================================"
-
-WIN_STEP=2
-PREV_WIN_DELTA="none"
-
-while true; do
-    WIN_UP=$((WINDOWSIZE + WIN_STEP))
-    WIN_DN=$((WINDOWSIZE - WIN_STEP))
-
-    ADD_WIN_UP=true
-    ADD_WIN_DN=true
-    [ "$PREV_WIN_DELTA" = "up"   ] && ADD_WIN_DN=false
-    [ "$PREV_WIN_DELTA" = "down" ] && ADD_WIN_UP=false
-
-    BEST_WIN=$WINDOWSIZE
-    BEST_WIN_F1=$BEST_F1
-    BEST_WIN_DELTA="none"
-
-    if [ "$ADD_WIN_UP" = true ]; then
-        echo "  Testing WINDOWSIZE=$WIN_UP..."
-        F1=$(get_f1 "$PSTAY" "$PSKIP" "$WIN_UP")
-        echo "    F1=$F1"
-        if fp_gt "$F1" "$BEST_WIN_F1"; then
-            BEST_WIN_F1=$F1; BEST_WIN=$WIN_UP; BEST_WIN_DELTA="up"
-        fi
-        fp_gt "$F1" "$BEST_F1" && ADD_WIN_DN=false
-    fi
-
-    if [ "$ADD_WIN_DN" = true ] && [ "$WIN_DN" -gt 0 ]; then
-        echo "  Testing WINDOWSIZE=$WIN_DN..."
-        F1=$(get_f1 "$PSTAY" "$PSKIP" "$WIN_DN")
-        echo "    F1=$F1"
-        if fp_gt "$F1" "$BEST_WIN_F1"; then
-            BEST_WIN_F1=$F1; BEST_WIN=$WIN_DN; BEST_WIN_DELTA="down"
-        fi
-    fi
-
-    if fp_gt "$BEST_WIN_F1" "$BEST_F1"; then
-        BEST_F1=$BEST_WIN_F1
-        WINDOWSIZE=$BEST_WIN
-        PREV_WIN_DELTA=$BEST_WIN_DELTA
-        echo "  --> New best: WINDOWSIZE=$WINDOWSIZE F1=$BEST_F1"
-    else
-        echo "  Converged."
-        break
-    fi
-done
+END_TIME=$(date +%s)
+ELAPSED=$((END_TIME - START_TIME))
 
 # ---------------------------------------------------------------------------
 # Final results
@@ -285,5 +236,6 @@ echo "  Segmenter = $SEGMENTER"
 echo "  P_STAY    = $PSTAY"
 echo "  P_SKIP    = $PSKIP"
 echo "  WINDOWSIZE= $WINDOWSIZE"
+echo "  Total time= ${ELAPSED} seconds"
 echo "  F1 Score  = $BEST_F1"
 echo "========================================"

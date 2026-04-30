@@ -717,7 +717,12 @@ int main(int argc, char *argv[])
     }
 
     double wall0 = omp_get_wtime();
-    baum_welch_full(N, means, vars, trans, obs, n_obs, 0.0001, 10000, n_threads);
+    float conv_threshold = 0.0001;
+    if (seq_k > 9) {
+        conv_threshold = conv_threshold * pow(4, seq_k - 9);
+    }
+
+    baum_welch_full(N, means, vars, trans, obs, n_obs, conv_threshold, 10000, n_threads);
     double wall1 = omp_get_wtime();
 
     fprintf(stderr, "Wall time: %.3f seconds\n", wall1 - wall0);
