@@ -8,7 +8,7 @@ HPC=$4
 SEGMENTER=$5
 
 EXEC="rawhash2"
-INDEX="../indexes/${PREFIX}_${HPC}_rawhash2_index_${PRESET}.ind"
+INDEX="./index/${PREFIX}_${HPC}_rawhash2_index_${PRESET}.ind"
 SIGNALS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_small.pod5"
 
 OUTDIR="out_${SEGMENTER}_corrected"
@@ -16,7 +16,7 @@ EVENTS="../../data/cern_datasets/CERN_data/${PREFIX}_small/${PREFIX}_${SEGMENTER
 PARAMS="--chunk-size 99999999 --r10 --events-file ${EVENTS}"
 
 if [[ "$HPC" == "hpc_off" ]]; then
-    PARAMS="${PARAMS} --sig-diff -1"
+    PARAMS="${PARAMS} --sig-diff 0"
 fi
 
 mkdir -p "$OUTDIR"

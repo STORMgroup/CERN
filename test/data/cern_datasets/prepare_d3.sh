@@ -31,14 +31,13 @@ SEGMENTER="../../../src/segmentation/bin/generate_events"
 
 "$SEGMENTER" -m rawhash2 --r10 -i "$POD5_FILE" -o "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv"
 
-
-CERN_PATH="../../../src/run_cern"
+CRANE_PATH="../../../src/crane"
 MODEL_DIR="../../../train/models"
 
-# Correct events with CERN
-"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm"  "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv"  > "${DATA_DIR}/${PREFIX}_scrappieR9_events_corrected.tsv"
+# Correct events with CRANE
+"$CRANE_PATH" "$MODEL_DIR/hmm_128.tsv" "${DATA_DIR}/${PREFIX}_scrappieR9_events.tsv" 0.3 0.02 -t $THREAD > "${DATA_DIR}/${PREFIX}_scrappieR9_events_corrected.tsv"
 
-"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
+"$CRANE_PATH" "$MODEL_DIR/hmm_128.tsv" "${DATA_DIR}/${PREFIX}_scrappieR10_events.tsv" 0.05 0.02 -t $THREAD > "${DATA_DIR}/${PREFIX}_scrappieR10_events_corrected.tsv"
 
 # Create and correct campolina events
 
@@ -57,4 +56,4 @@ PARQUET="test_multithread_events.parquet"
 
 python "${PARQTOE}" --parquet "${PARQUET}" --pod5 "${SIGNALS}" --target "${TARGET}"
 
-"$CERN_PATH" "$MODEL_DIR/hmm_196.hmm" "$TARGET" > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"
+"$CRANE_PATH" "$MODEL_DIR/hmm_128.tsv" "$TARGET" 0.035 0.01 -t $THREAD > "${DATA_DIR}/${PREFIX}_campolina_events_corrected.tsv"

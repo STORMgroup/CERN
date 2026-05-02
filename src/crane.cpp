@@ -8,6 +8,9 @@
 #include <limits>
 #include <chrono>
 #include <cstdint>
+#include <thread>
+#include <mutex>
+#include <atomic>
 
 using namespace std;
 
@@ -425,42 +428,129 @@ std::vector<float> remove_noise_with_stays(
     return corrected_events;
 }
 
+// ================================
+// Per-thread work function
+// ================================
+
+struct ThreadStats {
+    double total_correction_ms = 0.0;
+    long   reads_processed     = 0;
+};
+
+void worker_thread(
+    const HMM&   hmm,
+    ifstream&    fin,
+    mutex&       input_mutex,
+    mutex&       output_mutex,
+    int          window_size,
+    bool         removing_noise,
+    bool         removing_stays,
+    ThreadStats& stats)
+{
+    double thread_total_ms = 0.0;
+    long   thread_reads    = 0;
+
+    while (true) {
+        // ---- grab next line under lock ----
+        string line;
+        {
+            lock_guard<mutex> lk(input_mutex);
+            while (getline(fin, line)) {
+                if (!line.empty()) break;
+            }
+            if (line.empty()) break;   // EOF
+        }
+
+        // ---- parse ----
+        stringstream ss(line);
+        string read_id;
+        ss >> read_id;
+
+        vector<float> events;
+        float val;
+        while (ss >> val) {
+            events.push_back(val);
+        }
+
+        // ---- time the correction work ----
+        auto t0 = std::chrono::steady_clock::now();
+
+        // run viterbi
+        vector<int> path = viterbi_fast(hmm, events);
+
+        // remove stays
+        if (removing_stays) {
+            auto result = remove_stays(path, events, hmm);
+            events = std::move(result.first);
+            path   = std::move(result.second);
+        }
+
+        // remove noise
+        if (removing_noise) {
+            if (removing_stays) {
+                events = remove_noise(events, path, hmm, window_size);
+            } else {
+                events = remove_noise_with_stays(events, path, hmm, window_size);
+            }
+        }
+
+        auto t1 = std::chrono::steady_clock::now();
+        std::chrono::duration<double, std::milli> elapsed = t1 - t0;
+        thread_total_ms += elapsed.count();
+        ++thread_reads;
+
+        // ---- write output under lock (no interleaving) ----
+        {
+            lock_guard<mutex> lk(output_mutex);
+            cout << read_id;
+            for (float v : events) {
+                cout << '\t' << v;
+            }
+            cout << '\n';
+        }
+    }
+
+    stats.total_correction_ms = thread_total_ms;
+    stats.reads_processed      = thread_reads;
+}
 
 int main(int argc, char* argv[]) {
 
-    auto start = std::chrono::steady_clock::now();
-
-    // Command line args
+    auto wall_start = std::chrono::steady_clock::now();
 
     // ---- defaults for optional args ----
-    int window_size = 20;
+    int  window_size    = 20;
     bool removing_noise = true;
     bool removing_stays = true;
+    int  num_threads    = 1;
 
     // ---- required positional args ----
-    if (argc < 3) {
+    if (argc < 5) {
         cerr << "Usage: " << argv[0]
              << " <hmm_file> <event_file> <p_stay> <p_skip>"
-             << "[--window-size N] "
-             << "[--no-noise-removal] "
-             << "[--no-stay-removal]\n";
+             << " [-t COUNT]"
+             << " [--window-size N]"
+             << " [--no-noise-removal]"
+             << " [--no-stay-removal]\n";
         return 1;
     }
 
-    string hmm_filename = argv[1];
+    string hmm_filename   = argv[1];
     string event_filename = argv[2];
-    float p_stay = stof(argv[3]);
-    float p_skip = stof(argv[4]);
+    float  p_stay         = stof(argv[3]);
+    float  p_skip         = stof(argv[4]);
 
     // ---- parse optional flags ----
     for (int i = 5; i < argc; ++i) {
         string arg = argv[i];
 
-        if (arg == "--window-size") {
-            if (i + 1 >= argc) {
-                cerr << "Error: --window-size requires a value\n";
-                return 1;
-            }
+        if (arg == "-t") {
+            if (i + 1 >= argc) { cerr << "Error: -t requires a value\n"; return 1; }
+            num_threads = stoi(argv[++i]);
+            if (num_threads < 1) { cerr << "Error: thread count must be >= 1\n"; return 1; }
+        }
+        else if (arg == "--window-size") {
+            if (i + 1 >= argc) { cerr << "Error: --window-size requires a value\n"; return 1; }
             window_size = stoi(argv[++i]);
         }
         else if (arg == "--no-noise-removal") {
@@ -474,7 +564,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ---- load HMM ----
+    // ---- load HMM once (shared, read-only after this point) ----
     HMM hmm = load_hmm(hmm_filename, p_stay, p_skip);
 
     // ---- open event file ----
@@ -484,77 +574,55 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    string line;
+    // ---- shared synchronisation primitives ----
+    mutex input_mutex;   // guards fin
+    mutex output_mutex;  // guards cout
 
-    int lines = 0;
-    // ---- process each read ----
-    while (getline(fin, line)) {
-        if (line.empty()) continue;
-        lines++;
+    // ---- per-thread stats ----
+    vector<ThreadStats> stats(num_threads);
 
-        stringstream ss(line);
+    // ---- launch threads ----
+    vector<thread> threads;
+    threads.reserve(num_threads);
 
-        // first block = read ID
-        string read_id;
-        ss >> read_id;
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back(
+            worker_thread,
+            std::cref(hmm),
+            std::ref(fin),
+            std::ref(input_mutex),
+            std::ref(output_mutex),
+            window_size,
+            removing_noise,
+            removing_stays,
+            std::ref(stats[i])
+        );
+    }
 
-        // remaining blocks = events
-        vector<float> events;
-        float val;
-        while (ss >> val) {
-            events.push_back(val);
-        }
-
-
-        // ---- run viterbi ----
-        vector<int> path = viterbi_fast(hmm, events);
-
-        
-        // ---- remove stays ----
-        if (removing_stays) {
-            auto result = remove_stays(path, events, hmm);
-            events = std::move(result.first);
-            path = std::move(result.second);
-        } 
-
-
-        // ---- remove noise ----
-        if (removing_noise) {
-            if(removing_stays) {
-                events =
-                remove_noise(events,
-                                path,
-                                hmm,
-                                window_size);
-            } else {
-                events =
-                remove_noise_with_stays(events,
-                                path,
-                                hmm,
-                                window_size);
-            }
-        } 
-
-        // ---- output ----
-        cout << read_id;
-        for (float v : events) {
-            cout << "\t" << v;
-        }
-        cout << "\n";
+    // ---- join threads ----
+    for (auto& t : threads) {
+        t.join();
     }
 
     fin.close();
 
-    auto end = std::chrono::steady_clock::now();
+    // ---- aggregate stats ----
+    double total_correction_ms = 0.0;
+    long   total_reads         = 0;
 
-    std::chrono::duration<double, std::milli> duration = end - start;
+    for (int i = 0; i < num_threads; ++i) {
+        total_correction_ms += stats[i].total_correction_ms;
+        total_reads         += stats[i].reads_processed;
+    }
 
-    float time_per_read = duration.count() / lines;
-    float total_seconds = duration.count() / 1000.0f;
+    auto wall_end = std::chrono::steady_clock::now();
+    std::chrono::duration<double, std::milli> wall_ms = wall_end - wall_start;
 
-    std::cerr << "Time per read: " << time_per_read << " ms\n";
-    std::cerr << "Total time: " << total_seconds << " s\n";
-
+    cerr << "\nTotal reads processed : " << total_reads << "\n";
+    cerr << "Wall time             : " << wall_ms.count() / 1000.0 << " s\n";
+    cerr << "Avg correction time   : "
+         << (total_reads > 0 ? total_correction_ms / total_reads : 0.0)
+         << " ms/read\n";
 
     return 0;
 }

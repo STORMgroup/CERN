@@ -1,10 +1,10 @@
 CXX = g++
-CXXFLAGS = -O3 -std=c++17 -march=native -ffast-math
+CXXFLAGS = -O3 -std=c++17 -pthread -march=native -ffast-math
 
 LDFLAGS = -lm
 
-TARGET = run_cern
-SRC = run_cern.cpp
+TARGET = crane
+SRC = crane.cpp
 
 all: $(TARGET)
 

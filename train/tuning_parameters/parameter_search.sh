@@ -44,7 +44,7 @@ mkdir -p "indexes"
 
 REF="../../test/data/cern_datasets/CERN_data/d1_ecoli_small/d1_ecoli_ref.fa"
 
-PARAMS="--chunk-size 99999999 --r10 --sig-diff -1"
+PARAMS="--chunk-size 99999999 --r10 --sig-diff 0"
 
 if [ -f "indexes/rawhash2_training_index.ind" ]; then
   echo "Index already exists, continuing..."
