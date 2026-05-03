@@ -1,7 +1,7 @@
-# CERN Overview
-CERN is an HMM-based tool to correct raw nanopore signal events. To do this, it 1) Trains an HMM on synthetic and experimental nanopore event data and 2) uses the Viterbi algorithm and the learned HMM to correct novel signals.
+# CRANE Overview
+CRANE is an HMM-based tool to correct raw nanopore signal events. To do this, it 1) Trains an HMM on synthetic and experimental nanopore event data and 2) uses the Viterbi algorithm and the learned HMM to correct novel signals.
 
-In its current implementation, CERN takes in event sequences from a .tsv file, and outputs the corrected events to another .tsv.
+In its current implementation, CRANE takes in event sequences from a .tsv file, and outputs the corrected events to another .tsv.
 
 
 # Installation
@@ -32,7 +32,7 @@ make
   * Then add it to your $PATH or bin:
 
 ```bash
-cp run_cern /path/to/bin/
+cp crane /path/to/bin/
 ```
 
 # Usage
@@ -40,7 +40,7 @@ cp run_cern /path/to/bin/
 Correct nanopore event sequences by providing the path to the trained HMM, the .tsv containing event sequences, and the parameters p_stay and p_skip:
 
 ```
-run_cern ./path/to/hmm_file.hmm ./path/to/event_file.tsv <p_stay> <p_skip> > corrected_events.tsv
+crane ./path/to/hmm_file.hmm ./path/to/event_file.tsv <p_stay> <p_skip> > corrected_events.tsv
 ```
 
 # Training HMMs
@@ -49,4 +49,4 @@ In [train](./train/), you can train Hidden Markov Models to model nanopore dynam
 
 # Reproducing the results
 
-Follow the steps in [test/evaluation/README.md](./test/evaluation/).
+Follow the steps in [test/README.md](./test/).

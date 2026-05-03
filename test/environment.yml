@@ -1,4 +1,4 @@
-name: cern-env
+name: crane-env
 channels:
   - conda-forge
 dependencies:

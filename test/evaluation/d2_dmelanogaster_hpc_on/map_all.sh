@@ -3,7 +3,7 @@ set -e
 
 THREAD=$1
 
-PREFIX="d2_demelanogaster"
+PREFIX="d2_dmelanogaster"
 PRESET="sensitive"
 HPC="hpc_on"
 

@@ -2,18 +2,20 @@
 
 This directory contains the code for training a nanopore event modeling HMM.
 
-The training configuration can be edited at the top of each python file.
-
 
 ## Training
 
+This is an example of how to train an HMM, where n_states is the number of states, kmer_file is the pore model file with expected signal values, and the training sequence length is controlled by k, it will contain every k-mer exactly once.
+
 ```bash
-./train_hmm <n_states> <kmer_file> <k> <n_threads> > output.hmm
+make
+# ./train_hmm <n_states> <kmer_file> <k> <n_threads> > output.tsv
+./train_hmm 16 ../extern/kmer_models/uncalled_r1041_model_only_means 11 1 > output.tsv
 ```
 
 
 ## Pre-trained models
 
-We provide already trained models in [./models](./models/) for the Scrappie (R9.4), Scrappie (R10.4.1), and Campolina segmentation algorithms.
+We provide already trained models in [./models](./models/) of various sizes.
 
-They are trained on a sequence which contains all 10-mers exactly once.
+They were trained on a sequence which contains all 11-mers exactly once.

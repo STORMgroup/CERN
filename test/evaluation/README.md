@@ -2,7 +2,7 @@
 
 In order to evaluate CRANE, follow these steps:
 
-1. Make the segmenter and CERN executable in [../../src/](../../src/)
+1. Compile the segmenter and CRANE executable in [../../src/](../../src/)
 
 2. Install the necessary tools by following the steps in [evaluation](../)
    
@@ -14,7 +14,15 @@ cd d1_ecoli_hpc_off # Navigate to the wanted directory
 bash ./map_all.sh [THREAD_COUNT]
 ```
 
-1. View the results:
+5. View the results:
 ```bash
 cat summary.txt
+```
+
+## Summarizing results
+
+The script tabulate_results.sh will gather all existing results stored in summary.txt files:
+
+```bash
+bash tabulate_results.sh
 ```
